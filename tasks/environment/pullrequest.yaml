@@ -1,0 +1,46 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  creationTimestamp: null
+  name: pullrequest
+spec:
+  pipelineSpec:
+    tasks:
+    - name: from-build-pack
+      resources: {}
+      taskSpec:
+        metadata: {}
+        stepTemplate:
+          env:
+          - name: HOME
+            value: /tekton/home
+          envFrom:
+          - secretRef:
+              name: jx-boot-job-env-vars
+              optional: true
+          name: ""
+          resources:
+            limits: {}
+          workingDir: /workspace/source
+        steps:
+        - args:
+          - pr
+          command:
+          - make
+          envFrom:
+          - secretRef:
+              name: jx-boot-job-env-vars
+              optional: true
+          image: ghcr.io/jenkins-x/jx-boot:3.10.137
+          name: make-pr
+          resources:
+            requests:
+              cpu: 400m
+              memory: 512Mi
+        - image: uses:jenkins-x/jx3-pipeline-catalog/tasks/kubetest/environment.yaml@versionStream
+          name: ""
+          resources: {}
+  podTemplate: {}
+  serviceAccountName: tekton-bot
+  timeout: 12h0m0s
+status: {}

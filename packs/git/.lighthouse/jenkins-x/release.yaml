@@ -1,0 +1,52 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  annotations:
+    lighthouse.jenkins-x.io/prependStepsURL: https://raw.githubusercontent.com/jenkins-x/jx3-pipeline-catalog/60bed6408732c1eda91a15713f51a9f97dcb1757/tasks/git-clone/git-clone.yaml
+  name: release
+spec:
+  pipelineSpec:
+    tasks:
+    - name: from-build-pack
+      resources: {}
+      taskSpec:
+        metadata: {}
+        stepTemplate:
+          name: ""
+          resources:
+            # override limits for all containers here
+            limits: {}
+          workingDir: /workspace/source
+        steps:
+        - image: ghcr.io/jenkins-x/jx-release-version:2.7.3
+          name: next-version
+          resources: {}
+          script: |
+            #!/usr/bin/env sh
+            jx-release-version --tag > VERSION
+          env:
+          - name: GIT_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: tekton-git
+                key: password
+          - name: GIT_USER
+            valueFrom:
+              secretKeyRef:
+                name: tekton-git
+                key: username
+        - image: ghcr.io/jenkins-x/jx-boot:3.10.137
+          name: jx-variables
+          resources:
+            # override requests for the pod here
+            requests:
+              cpu: 400m
+              memory: 600Mi
+          script: |
+            #!/usr/bin/env sh
+            jx gitops variables
+
+  podTemplate: {}
+  serviceAccountName: tekton-bot
+  timeout: 12h0m0s
+status: {}

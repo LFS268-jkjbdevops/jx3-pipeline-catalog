@@ -1,0 +1,61 @@
+apiVersion: config.lighthouse.jenkins-x.io/v1alpha1
+kind: TriggerConfig
+spec:
+  presubmits:
+  - name: lint-pipelines
+    context: "lint-pipelines"
+    always_run: true
+    optional: false
+    trigger: (?m)^/test( all| lint-pipelines.*),?(s+|$)
+    rerun_command: /test lint-pipelines
+    source: "lint-pipelines.yaml"
+  - name: lint-helm
+    context: "lint-helm"
+    always_run: true
+    optional: false
+    trigger: (?m)^/test( all| lint-helm.*),?(s+|$)
+    rerun_command: /test lint-helm
+    source: "lint-helm.yaml"
+  - name: godemo
+    context: "godemo"
+    always_run: false
+    optional: false
+    trigger: (?m)^/test( all| go.*),?(s+|$)
+    rerun_command: /test go
+    source: "pullrequest.yaml"
+  - name: gradledemo
+    context: "gradledemo"
+    always_run: false
+    optional: false
+    trigger: (?m)^/test( all| gradle.*),?(s+|$)
+    rerun_command: /test gradle
+    source: "pullrequest.yaml"
+  - name: nodedemo
+    context: "nodedemo"
+    always_run: false
+    optional: false
+    trigger: (?m)^/test( all| node.*),?(s+|$)
+    rerun_command: /test node
+    source: "pullrequest.yaml"
+  - name: pythondemo
+    context: "pythondemo"
+    always_run: false
+    optional: false
+    trigger: (?m)^/test( all| python.*),?(s+|$)
+    rerun_command: /test python
+    source: "pullrequest.yaml"
+  - name: springdemo
+    context: "springdemo"
+    always_run: false
+    optional: false
+    trigger: (?m)^/test( all| spring.*),?(s+|$)
+    rerun_command: /test spring
+    source: "pullrequest.yaml"
+  postsubmits:
+  - name: release
+    context: "release"
+    source: "release.yaml"
+    ignore_changes: '^\.lighthouse/jenkins-x/pullrequest\.yaml$'
+    branches:
+    - ^main$
+    - ^master$

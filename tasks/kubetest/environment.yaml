@@ -1,0 +1,34 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  creationTimestamp: null
+  name: release
+spec:
+  pipelineSpec:
+    tasks:
+    - name: environment
+      taskSpec:
+        metadata: {}
+        stepTemplate:
+          env:
+          - name: HOME
+            value: /tekton/home
+          envFrom:
+          - secretRef:
+              name: jx-boot-job-env-vars
+              optional: true
+          name: ""
+          resources: {}
+          workingDir: /workspace/source
+        steps:
+        - command:
+          - jx-kube-test
+          - run
+          - --source-dir
+          - config-root
+          image: ghcr.io/jenkins-x/jx-kube-test:0.0.12
+          name: kubetest
+          resources: {}
+  serviceAccountName: tekton-bot
+  timeout: 240h0m0s
+status: {}

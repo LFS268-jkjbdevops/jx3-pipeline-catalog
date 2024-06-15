@@ -1,0 +1,32 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  creationTimestamp: null
+  name: release
+spec:
+  pipelineSpec:
+    tasks:
+    - name: updatebot
+      taskSpec:
+        metadata: {}
+        stepTemplate:
+          env:
+          - name: HOME
+            value: /tekton/home
+          envFrom:
+          - secretRef:
+              name: jx-boot-job-env-vars
+              optional: true
+          name: ""
+          resources: {}
+          workingDir: /workspace/source
+        steps:
+        - command:
+          - jx-updatebot
+          - pr
+          image: ghcr.io/jenkins-x/jx-updatebot:0.4.17
+          name: promote-release
+          resources: {}
+  serviceAccountName: tekton-bot
+  timeout: 12h0m0s
+status: {}
